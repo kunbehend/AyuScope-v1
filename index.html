@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AyuScope - Respiratory Health Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            overscroll-behavior: none;
+        }
+        
+        .mobile-frame {
+            max-width: 390px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+        
+        .status-bar {
+            background: #fafbfc;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #2c3e50;
+            border-bottom: 1px solid #e8ecef;
+        }
+        
+        .screen {
+            display: none;
+            animation: slideIn 0.3s ease;
+            min-height: calc(100vh - 44px);
+            background: #fafbfc;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #5DADE2 0%, #48C9B0 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-back {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 20px;
+            background: #fafbfc;
+        }
+        
+        .logo-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fafbfc;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .app-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .app-subtitle {
+            color: #5D6D7E;
+            font-size: 18px;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #17A2B8 0%, #20B2AA 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #E8F6F3;
+            color: #2c3e50;
+            border: 1px solid #A9CCE3;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+        
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .consent-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #D5E8F2;
+        }
+        
+        .consent-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .consent-checkbox {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            accent-color: #17A2B8;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-label {
+            display: block;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D5E8F2;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .body-diagram {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #D5E8F2;
+        }
+        
+        .position-indicator {
+            text-align: center;
+            color: #17A2B8;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .tip-box {
+            background: #FEF9E7;
+            border: 1px solid #F9E79F;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 14px;
+            color: #7D6608;
+        }
+        
+        .recording-interface {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .timer-circle {
+            width: 180px;
+            height: 180px;
+            border: 8px solid #E8F6F3;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .timer-circle.recording {
+            border-color: #EC7063;
+            animation: rotate 8s linear;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .timer-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .quality-bar {
+            height: 8px;
+            background: #E8F6F3;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #EC7063, #F9E79F, #52C41A);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .result-card {
+            background: white;
+            border: 1px solid #E8F6F3;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #52C41A;
+        }
+        
+        .result-card.critical {
+            border-left-color: #EC7063;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .result-confidence {
+            color: #5D6D7E;
+            font-size: 14px;
+        }
+        
+        .action-list {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #D5E8F2;
+        }
+        
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .action-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #5DADE2 0%, #48C9B0 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+        
+        .demo-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border: 1px solid #D5E8F2;
+        }
+        
+        .demo-label {
+            font-size: 12px;
+            color: #5D6D7E;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 8px;
+            background: #E8F6F3;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #52C41A;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .sites-tracker {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .site-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #E8F6F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #5D6D7E;
+            border: 1px solid #D5E8F2;
+        }
+        
+        .site-dot.completed {
+            background: #52C41A;
+            color: white;
+            border-color: #52C41A;
+        }
+        
+        .site-dot.current {
+            background: linear-gradient(135deg, #5DADE2 0%, #48C9B0 100%);
+            color: white;
+            animation: pulse 2s infinite;
+            border: none;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #E8F6F3;
+            border-top: 3px solid #5DADE2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-animation {
+            font-size: 72px;
+            text-align: center;
+            animation: scaleIn 0.5s ease;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .priority-high {
+            background: #FADBD8;
+            border: 1px solid #EC7063;
+            color: #922B21;
+        }
+        
+        .info-box {
+            background: #D6EAF8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #1B4F72;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-frame">
+        <div class="status-bar">
+            <span id="time">9:41 AM</span>
+            <span>📶 🔋 89%</span>
+        </div>
+        
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome">
+            <div class="logo-section">
+                <div class="logo">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="logo-img">
+                        <path d="M30 20 Q30 10, 40 10 L60 10 Q70 10, 70 20 L70 35" 
+                              stroke="#17A2B8" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        <path d="M35 10 L35 5" stroke="#48C9B0" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M65 10 L65 5" stroke="#48C9B0" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="35" cy="5" r="3" fill="#5DADE2"/>
+                        <circle cx="65" cy="5" r="3" fill="#5DADE2"/>
+                        <path d="M70 35 Q70 50, 55 60 L50 65 L45 60 Q30 50, 30 35" 
+                              stroke="#17A2B8" stroke-width="3" fill="none"/>
+                        <circle cx="50" cy="70" r="8" fill="#48C9B0"/>
+                        <circle cx="50" cy="70" r="5" fill="#5DADE2"/>
+                    </svg>
+                </div>
+                <h1 class="app-title">AyuScope</h1>
+                <p class="app-subtitle">The doctor's ear,<br>in your hands</p>
+                <button class="btn-primary" onclick="window.goToScreen('language')">Get Started</button>
+                <p style="color: #95A5A6; margin-top: 40px; font-size: 12px;">Demo Version 1.0</p>
+            </div>
+        </div>
+        
+        <!-- Language Selection -->
+        <div class="screen" id="language">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">Language / भाषा</span>
+                <span></span>
+            </div>
+            <div class="content">
+                <h2 style="text-align: center; margin: 30px 0; color: #2c3e50;">Select Language<br><span style="color: #5D6D7E;">भाषा चुनें</span></h2>
+                <div class="language-grid">
+                    <button class="btn-primary" onclick="window.selectLanguage('en')">English</button>
+                    <button class="btn-primary" onclick="window.selectLanguage('hi')">हिन्दी</button>
+                    <button class="btn-secondary" onclick="window.selectLanguage('kn')">ಕನ್ನಡ</button>
+                    <button class="btn-secondary" onclick="window.selectLanguage('te')">తెలుగు</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Consent Screen -->
+        <div class="screen" id="consent">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">Patient Consent</span>
+                <span id="lang-indicator">EN</span>
+            </div>
+            <div class="content">
+                <div class="info-box">
+                    <p>📋 Please read this to the patient</p>
+                </div>
+                
+                <div class="consent-box">
+                    <div class="consent-item">
+                        <input type="checkbox" class="consent-checkbox" id="c1" checked>
+                        <label for="c1">I consent to recording lung sounds</label>
+                    </div>
+                    <div class="consent-item">
+                        <input type="checkbox" class="consent-checkbox" id="c2" checked>
+                        <label for="c2">Data will be shared with health systems</label>
+                    </div>
+                    <div class="consent-item">
+                        <input type="checkbox" class="consent-checkbox" id="c3" checked>
+                        <label for="c3">AI will analyze the recordings</label>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Patient Age *</label>
+                    <input type="number" class="input-field" placeholder="Years" value="35" required>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">ABHA ID</label>
+                    <input type="text" class="input-field" placeholder="14-digit ABHA number">
+                    <small style="color: #5D6D7E; font-size: 12px;">Note: For children, enter guardian's ABHA with child's name/age</small>
+                </div>
+                
+                <button class="btn-primary" onclick="window.goToScreen('placement')">I Agree - Continue</button>
+            </div>
+        </div>
+        
+        <!-- Placement Guide -->
+        <div class="screen" id="placement">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">Stethoscope Placement</span>
+                <span id="position-count">1/8</span>
+            </div>
+            <div class="content">
+                <div class="position-indicator" id="position-text">Position 1: Upper Right Chest</div>
+                
+                <div class="body-diagram" style="position: relative; background: white; border-radius: 16px; padding: 20px; margin: 20px auto; max-width: 400px;">
+                    <div id="diagram-container" style="position: relative;">
+                        <div style="text-align: center; padding: 40px;">
+                            <p style="color: #5D6D7E;">Loading auscultation diagram...</p>
+                        </div>
+                    </div>
+                    <div id="points-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+                </div>
+                
+                <div class="tip-box" id="position-tip">
+                    💡 <strong>Tip:</strong> Place stethoscope at the 2nd intercostal space, just below the clavicle. Hold firmly against skin and ask child to breathe normally.
+                </div>
+                
+                <div class="sites-tracker" id="sites-tracker">
+                    <div class="site-dot current">1</div>
+                    <div class="site-dot">2</div>
+                    <div class="site-dot">3</div>
+                    <div class="site-dot">4</div>
+                    <div class="site-dot">5</div>
+                    <div class="site-dot">6</div>
+                    <div class="site-dot">7</div>
+                    <div class="site-dot">8</div>
+                </div>
+                
+                <button class="btn-primary" onclick="window.goToScreen('recording')">Start Recording</button>
+            </div>
+        </div>
+        
+        <!-- Recording Screen -->
+        <div class="screen" id="recording">
+            <div class="header">
+                <span class="header-back" onclick="window.stopRecording()">✕</span>
+                <span class="header-title">Recording...</span>
+                <span style="color: #EC7063;">● REC</span>
+            </div>
+            <div class="content">
+                <div class="recording-interface">
+                    <h3 style="color: #2c3e50;">Hold Steady</h3>
+                    <p style="color: #5D6D7E; margin-bottom: 30px;">Ask patient to breathe deeply</p>
+                    
+                    <div class="timer-circle" id="timer-circle">
+                        <span class="timer-text" id="timer">8</span>
+                    </div>
+                    
+                    <div>
+                        <p style="color: #5D6D7E; margin-bottom: 8px;">Audio Quality</p>
+                        <div class="quality-bar">
+                            <div class="quality-fill" id="quality-fill"></div>
+                        </div>
+                        <p style="color: #52C41A; font-weight: 600;" id="quality-text">Good Quality ✓</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px; padding: 20px; background: #ffffff; border-radius: 8px; border: 1px solid #D5E8F2;">
+                    <p style="font-size: 12px; color: #5D6D7E; text-align: center; margin-bottom: 10px;">Demo: Upload .wav file</p>
+                    <input type="file" id="wav-upload" accept=".wav,audio/wav" class="file-input" onchange="window.handleWavUpload(event)">
+                    <button class="btn-secondary" onclick="document.getElementById('wav-upload').click()">
+                        📁 Select WAV File
+                    </button>
+                    <p id="file-status" style="font-size: 12px; color: #52C41A; text-align: center; margin-top: 8px;"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quality Check Screen -->
+        <div class="screen" id="quality">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">Quality Check</span>
+                <span>✓</span>
+            </div>
+            <div class="content">
+                <div style="text-align: center; margin: 30px 0;">
+                    <div style="width: 100px; height: 100px; background: #52C41A; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: white; font-size: 48px;">✓</span>
+                    </div>
+                    <h3 style="color: #2c3e50;">Good Recording!</h3>
+                    <p style="color: #5D6D7E; margin-top: 10px;">Clear lung sounds captured</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #D5E8F2;">
+                        <p style="color: #5D6D7E; font-size: 12px;">Duration</p>
+                        <p style="font-size: 20px; font-weight: bold; color: #2c3e50;">8.2s</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #D5E8F2;">
+                        <p style="color: #5D6D7E; font-size: 12px;">Noise</p>
+                        <p style="font-size: 20px; font-weight: bold; color: #52C41A;">Low</p>
+                    </div>
+                </div>
+                
+                <div class="sites-tracker">
+                    <div class="site-dot completed">1</div>
+                    <div class="site-dot">2</div>
+                    <div class="site-dot">3</div>
+                    <div class="site-dot">4</div>
+                    <div class="site-dot">5</div>
+                    <div class="site-dot">6</div>
+                    <div class="site-dot">7</div>
+                    <div class="site-dot">8</div>
+                </div>
+                
+                <button class="btn-primary" onclick="window.goToScreen('placement')">Next Position</button>
+                <button class="btn-secondary" onclick="window.goToScreen('recording')">Re-record</button>
+            </div>
+        </div>
+        
+        <!-- AI Analysis Screen -->
+        <div class="screen" id="analysis">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">AI Analysis</span>
+                <span>🤖</span>
+            </div>
+            <div class="content">
+                <div style="text-align: center; padding: 40px 20px;">
+                    <h3 style="color: #2c3e50;">Analyzing Lung Sounds...</h3>
+                    <div class="loading-spinner"></div>
+                    <p style="color: #5D6D7E;">Processing with AI Model</p>
+                    <p style="color: #5D6D7E; font-size: 14px; margin-top: 10px;">This may take a few seconds</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div class="screen" id="results">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">Results</span>
+                <span>📊</span>
+            </div>
+            <div class="content">
+                <div style="text-align: center; margin: 20px 0;">
+                    <div class="success-animation">✅</div>
+                    <h3 style="color: #2c3e50;">Analysis Complete</h3>
+                </div>
+                
+                <div id="ai-results">
+                    <div class="result-card critical">
+                        <div>
+                            <div class="result-title">Wheezing & Crackling Detected</div>
+                            <div class="result-confidence">Can be indicative of pneumonia</div>
+                            <div class="result-confidence">Confidence: 78%</div>
+                        </div>
+                        <span style="font-size: 24px;">⚠️</span>
+                    </div>
+                </div>
+                
+                <div style="background: #FEF9E7; padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid #F9E79F;">
+                    <h4 style="margin-bottom: 8px; color: #7D6608;">📋 Recommendations</h4>
+                    <p style="font-size: 14px;" id="recommendations">• Immediate medical attention required<br>• Check oxygen saturation<br>• Monitor temperature</p>
+                </div>
+                
+                <button class="btn-primary" onclick="window.goToScreen('action')">View Action Plan</button>
+            </div>
+        </div>
+        
+        <!-- Action Plan Screen -->
+        <div class="screen" id="action">
+            <div class="header">
+                <span class="header-back" onclick="window.goBack()">←</span>
+                <span class="header-title">Action Plan</span>
+                <span>💾</span>
+            </div>
+            <div class="content">
+                <div class="priority-high" style="padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4>⚠️ High Priority</h4>
+                    <p style="font-size: 14px;">Immediate attention needed</p>
+                </div>
+                
+                <h3 style="margin-bottom: 16px; color: #2c3e50;">Next Steps:</h3>
+                <div class="action-list">
+                    <div class="action-item">
+                        <div class="action-number">1</div>
+                        <div>
+                            <strong>Verification with doctor via telemedicine</strong>
+                            <p style="color: #5D6D7E; font-size: 14px;">Connect for immediate consultation</p>
+                        </div>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-number">2</div>
+                        <div>
+                            <strong>Upon review, administer medication</strong>
+                            <p style="color: #5D6D7E; font-size: 14px;">Follow doctor's prescription</p>
+                        </div>
+                    </div>
+                    <div class="action-item">
+                        <div class="action-number">3</div>
+                        <div>
+                            <strong>Monitor vital signs</strong>
+                            <p style="color: #5D6D7E; font-size: 14px;">Check SpO2, temperature, respiratory rate</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #D6EAF8; padding: 12px; border-radius: 8px; margin: 20px 0; border: 1px solid #AED6F1;">
+                    <p style="color: #1B4F72; font-size: 14px;">✓ Data saved • Will sync online</p>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4 style="margin-bottom: 12px; color: #2c3e50;">Share Report:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <button class="share-option-btn" onclick="window.shareViaSMS()" style="background: #E8F6F3; border: 1px solid #17A2B8; border-radius: 8px; padding: 15px 10px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">📱</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 600;">SMS</div>
+                        </button>
+                        
+                        <button class="share-option-btn" onclick="window.shareViaWhatsApp()" style="background: #E8F6F3; border: 1px solid #17A2B8; border-radius: 8px; padding: 15px 10px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">💬</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 600;">WhatsApp</div>
+                        </button>
+                        
+                        <button class="share-option-btn" onclick="window.shareViaEmail()" style="background: #E8F6F3; border: 1px solid #17A2B8; border-radius: 8px; padding: 15px 10px; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">📧</div>
+                            <div style="font-size: 12px; color: #2c3e50; font-weight: 600;">Email</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <button class="btn-secondary" onclick="window.resetDemo()">New Screening</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="demo-controls">
+        <div class="demo-label">DEMO CONTROLS</div>
+        <button class="btn-secondary" style="font-size: 14px; padding: 8px;" onclick="window.simulateModelCall()">
+            🤖 Simulate AI Analysis
+        </button>
+        <div class="model-status">
+            <span class="status-dot" id="model-status-dot"></span>
+            <span id="model-status-text">Model: Ready</span>
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let currentScreen = 'welcome';
+        let screenHistory = [];
+        let uploadedFile = null;
+        let selectedLanguage = 'en';
+        let currentPosition = 1;
+        let recordingTimer = null;
+        let analysisResults = null;
+        let patientAge = 35;
+        
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            document.getElementById('time').textContent = `${displayHours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // Setup auscultation diagram based on age
+        window.setupAuscultationDiagram = function() {
+            const ageInput = document.querySelector('.input-field[type="number"]');
+            const age = ageInput ? parseInt(ageInput.value) || 35 : 35;
+            patientAge = age;
+            
+            const diagramContainer = document.getElementById('diagram-container');
+            if (!diagramContainer) return;
+            
+            const isChild = age < 12;
+            
+            diagramContainer.innerHTML = `
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: center; min-height: 350px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">${isChild ? '👶' : '🧑'}</div>
+                    <p style="color: #2c3e50; font-weight: 600; margin-bottom: 10px;">
+                        ${isChild ? 'Child (<12 years)' : 'Adult (≥12 years)'} Auscultation Points
+                    </p>
+                    <p style="color: #5D6D7E; font-size: 14px;">
+                        ${isChild ? '8 point pediatric protocol' : '8 point adult protocol'}
+                    </p>
+                    <div style="margin-top: 20px; display: flex; gap: 20px; justify-content: center;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px;">🫁</div>
+                            <small>Front View</small>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px;">🔙</div>
+                            <small>Back View</small>
+                        </div>
+                    </div>
+                    <p style="color: #95A5A6; font-size: 11px; margin-top: 20px;">
+                        In production: Medical illustration with lung overlay
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('position-count').textContent = '1/8';
+        }
+        
+        // Navigation
+        window.goToScreen = function(screenId) {
+            screenHistory.push(currentScreen);
+            showScreen(screenId);
+            
+            if (screenId === 'placement') {
+                setupAuscultationDiagram();
+            } else if (screenId === 'recording') {
+                startRecordingAnimation();
+            } else if (screenId === 'analysis') {
+                setTimeout(() => {
+                    if (uploadedFile) {
+                        processWavFile();
+                    } else {
+                        simulateModelCall();
+                    }
+                }, 2000);
+            }
+        }
+        
+        window.goBack = function() {
+            if (screenHistory.length > 0) {
+                const previousScreen = screenHistory.pop();
+                showScreen(previousScreen);
+            }
+        }
+        
+        window.showScreen = function(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+            currentScreen = screenId;
+        }
+        
+        window.selectLanguage = function(lang) {
+            selectedLanguage = lang;
+            document.getElementById('lang-indicator').textContent = lang.toUpperCase();
+            goToScreen('consent');
+        }
+        
+        // Recording animation
+        window.startRecordingAnimation = function() {
+            let seconds = 8;
+            document.getElementById('timer').textContent = seconds;
+            document.getElementById('timer-circle').classList.add('recording');
+            
+            let quality = 0;
+            const qualityInterval = setInterval(() => {
+                quality = Math.min(quality + 10, 75);
+                document.getElementById('quality-fill').style.width = quality + '%';
+                
+                if (quality > 60) {
+                    document.getElementById('quality-text').textContent = 'Good Quality ✓';
+                    document.getElementById('quality-text').style.color = '#52C41A';
+                }
+            }, 200);
+            
+            recordingTimer = setInterval(() => {
+                seconds--;
+                document.getElementById('timer').textContent = seconds;
+                
+                if (seconds === 0) {
+                    clearInterval(recordingTimer);
+                    clearInterval(qualityInterval);
+                    document.getElementById('timer-circle').classList.remove('recording');
+                    
+                    setTimeout(() => {
+                        goToScreen('quality');
+                    }, 1000);
+                }
+            }, 1000);
+        }
+        
+        window.stopRecording = function() {
+            if (recordingTimer) {
+                clearInterval(recordingTimer);
+            }
+            goBack();
+        }
+        
+        // WAV file handling
+        window.handleWavUpload = function(event) {
+            const file = event.target.files[0];
+            if (file && file.name.endsWith('.wav')) {
+                uploadedFile = file;
+                document.getElementById('file-status').textContent = `✓ ${file.name} uploaded`;
+                document.getElementById('model-status-dot').classList.remove('offline');
+                document.getElementById('model-status-text').textContent = 'Model: Processing...';
+                
+                setTimeout(() => {
+                    goToScreen('analysis');
+                }, 1000);
+            }
+        }
+        
+        // Process WAV file
+        window.processWavFile = async function() {
+            if (!uploadedFile) {
+                simulateModelCall();
+                return;
+            }
+            
+            document.getElementById('model-status-text').textContent = 'Model: Analyzing...';
+            
+            setTimeout(() => {
+                const mockResults = {
+                    wheeze: { detected: true, confidence: 0.78, severity: 'moderate' },
+                    crackle: { detected: true, confidence: 0.65, severity: 'moderate' },
+                    pneumonia_risk: { detected: true, confidence: 0.72, severity: 'high' },
+                    normal: { detected: false, confidence: 0.10, severity: 'none' },
+                    quality_score: 0.92
+                };
+                
+                displayResults(mockResults);
+            }, 1500);
+        }
+        
+        // Simulate model call
+        window.simulateModelCall = function() {
+            const criticalResult = {
+                wheeze: { detected: true, confidence: 0.78, severity: 'moderate' },
+                crackle: { detected: true, confidence: 0.65, severity: 'moderate' },
+                pneumonia_risk: { detected: true, confidence: 0.72, severity: 'high' },
+                normal: { detected: false, confidence: 0.08, severity: 'none' },
+                quality_score: 0.89
+            };
+            
+            setTimeout(() => {
+                displayResults(criticalResult);
+            }, 1500);
+        }
+        
+        // Display results
+        window.displayResults = function(results) {
+            analysisResults = results;
+            document.getElementById('model-status-text').textContent = 'Model: Complete';
+            goToScreen('results');
+        }
+        
+        // Share functions
+        window.shareViaSMS = function() {
+            alert('SMS Sharing\n\n📱 Sending report to patient\'s registered mobile\n+91 98765 43210\n\nReport includes:\n• AI findings\n• Priority level\n• Next steps\n• Doctor consultation link');
+        }
+        
+        window.shareViaWhatsApp = function() {
+            const message = encodeURIComponent('AyuScope Report\n\n⚠️ High Priority\nWheezing & Crackling detected\n\nImmediate medical attention required.\nConsult doctor: [Link]\n\nAyuScope - Healthcare for All');
+            alert('WhatsApp Sharing\n\n💬 Opening WhatsApp with report\n\nIn production: Direct WhatsApp Business API integration');
+        }
+        
+        window.shareViaEmail = function() {
+            alert('Email Sharing\n\n📧 Sending detailed report to:\n• Patient email\n• PHC coordinator\n• District medical officer\n\nReport includes full screening data and recommendations');
+        }
+        
+        // Reset demo
+        window.resetDemo = function() {
+            currentScreen = 'welcome';
+            screenHistory = [];
+            uploadedFile = null;
+            currentPosition = 1;
+            analysisResults = null;
+            
+            document.getElementById('file-status').textContent = '';
+            document.getElementById('quality-fill').style.width = '0%';
+            document.getElementById('quality-text').textContent = 'Detecting...';
+            
+            document.querySelectorAll('.consent-checkbox').forEach(cb => cb.checked = false);
+            
+            showScreen('welcome');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AyuScope Demo Ready');
+        });
+    </script>
+</body>
+</html>
